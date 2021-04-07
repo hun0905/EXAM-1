@@ -19,17 +19,17 @@ DigitalIn mypin(USER_BUTTON);//out data
 EventQueue queue1(32 * EVENTS_EVENT_SIZE);
 EventQueue queue2(32 * EVENTS_EVENT_SIZE);
 EventQueue queue3(32 * EVENTS_EVENT_SIZE);
-
-Thread t1,t2,t3;
+EventQueue queue4(32 * EVENTS_EVENT_SIZE);
+EventQueue queue5(32 * EVENTS_EVENT_SIZE);
+Thread t1,t2,t3,t4,t5;
 
 int j = 3;
 float ADCdata[5000];
-int count;
+int t = 0;
 int Time[4] = {10,20,40,80};//cycle time
 int TimeNow = Time[j];//cycle time now
 int RiseTime = TimeNow;
 int FallTime = TimeNow;
-
 void Display(int &i)
 {
     uLCD.cls();
@@ -46,16 +46,28 @@ void Display(int &i)
         uLCD.printf("%s","1"); 
 
 }
+void Sampling()
+{
+    while(1)
+    {
+        int k = 0 ;
+        if(k>5000)
+        {
+            for(int i = 0 ; i < 1000 ; i++)
+            {
+                std::cout<<ADCdata[i]<<"\r\n";
+            }
+        }
+        k++;
+        ThisThread::sleep_for(1ms);
+    }
+}
 void Generate()
 {
-    int tmp;
     uint16_t sample = 0;
-    int count = 0;
+    
     Display(j);
     while (1) {
-        if(j!= tmp)
-            Display(j);
-        tmp = j;
         for (int i = 0; i < TimeNow*2; i++) {
             if(i < TimeNow)   
                 sample = (uint16_t)(offset*i/RiseTime);
@@ -72,15 +84,8 @@ void Generate()
                     ThisThread::sleep_for(219ms);
             }
             aout.write_u16(sample);
-            ADCdata[count] = ain;
-            //count++;
-            /*if(count >= 5000){
-                for(int i = 0 ; i < 1000 ; i++)
-                {
-                    std::cout<<ADCdata[i]<<"\r\n";
-                }
-                count = 0;
-            }*/
+            ADCdata[t] = ain;
+            t++;
             ThisThread::sleep_for(1ms);
         }    
    }
@@ -92,7 +97,7 @@ void ISR1() //up
     RiseTime = TimeNow;
     FallTime = TimeNow;
     Display(j);
-    ThisThread::sleep_for(1000ms);
+    ThisThread::sleep_for(100ms);
 }
 void ISR2()
 {
@@ -101,7 +106,7 @@ void ISR2()
     RiseTime = TimeNow;
     FallTime = TimeNow;
     Display(j);
-    ThisThread::sleep_for(1000ms);
+    ThisThread::sleep_for(100ms);
 }
 void ISR3()//select
 {
@@ -110,8 +115,11 @@ void ISR3()//select
     TimeNow = Time[j];
     RiseTime = TimeNow;
     FallTime = TimeNow;
-    Generate();
-    ThisThread::sleep_for(1000ms);
+    t4.start(callback(&queue4, &EventQueue::dispatch_forever));
+    queue4.call(Generate);
+    t5.start(callback(&queue5, &EventQueue::dispatch_forever));
+    queue5.call(Sampling);
+    ThisThread::sleep_for(100ms);
     
 }
 int main()
@@ -126,30 +134,6 @@ int main()
     button1.rise(queue1.event(ISR1));
     button2.rise(queue2.event(ISR2));
     button3.rise(queue3.event(ISR3));
-    /*while (1) {
-        if(j!= tmp)
-            Display(j);
-        tmp = j;
-        for (int i = 0; i < TimeNow*2; i++) {
-            if(i < TimeNow)   
-                sample = (uint16_t)(offset*i/RiseTime);
-            else if(i > TimeNow )
-                sample = (uint16_t)(offset*(2*TimeNow-i)/FallTime);
-            else if(i == TimeNow){
-                if(j == 3)
-                    ThisThread::sleep_for(79ms);
-                else if(j == 2)
-                    ThisThread::sleep_for(159ms);
-                else if(j == 1)
-                    ThisThread::sleep_for(199ms);
-                else
-                    ThisThread::sleep_for(219ms);
-            }
-            aout.write_u16(sample);
-            ADCdata[count] = ain;
-            
-            ThisThread::sleep_for(1ms);
-        }    
-   }*/
+    
    
 }
