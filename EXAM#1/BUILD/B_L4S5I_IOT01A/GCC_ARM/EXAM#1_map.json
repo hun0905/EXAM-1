@@ -13,23 +13,23 @@
     {
         "module": "BUILD/B_L4S5I_IOT01A",
         "size": {
-            ".text": 2996,
+            ".text": 3054,
             ".data": 20,
             ".bss": 22213,
-            ".text-delta": 102,
+            ".text-delta": -8,
             ".data-delta": 0,
-            ".bss-delta": 4
+            ".bss-delta": 0
         }
     },
     {
         "module": "[fill]",
         "size": {
-            ".text": 154,
+            ".text": 188,
             ".data": 12,
             ".bss": 34,
-            ".text-delta": -38,
+            ".text-delta": 8,
             ".data-delta": 0,
-            ".bss-delta": -4
+            ".bss-delta": 0
         }
     },
     {
@@ -79,7 +79,7 @@
     {
         "module": "[lib]/stdc++.a",
         "size": {
-            ".text": 175916,
+            ".text": 177040,
             ".data": 145,
             ".bss": 5720,
             ".text-delta": 0,
@@ -91,8 +91,8 @@
         "summary": {
             "static_ram": 39928,
             "static_ram_delta": 0,
-            "total_flash": 304412,
-            "total_flash_delta": 64
+            "total_flash": 305628,
+            "total_flash_delta": 0
         }
     }
 ]

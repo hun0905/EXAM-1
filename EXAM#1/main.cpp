@@ -35,7 +35,7 @@ void Display(int &i)
     uLCD.cls();
     uLCD.text_width(2); //4X size text
     uLCD.text_height(2);
-    uLCD.locate(4,2);
+    uLCD.locate(4,4);
     if(i == 0)
         uLCD.printf("%s","1/8");
     else if(i == 1)
@@ -50,22 +50,22 @@ void Sampling()
 {
     while(1)
     {
-        int k = 0 ;
-        if(k>5000)
+        ADCdata[t] = ain;
+        t++;
+        if(t>1000)
         {
             for(int i = 0 ; i < 1000 ; i++)
             {
                 std::cout<<ADCdata[i]<<"\r\n";
             }
+            t=0;
         }
-        k++;
         ThisThread::sleep_for(1ms);
     }
 }
 void Generate()
 {
     uint16_t sample = 0;
-    
     Display(j);
     while (1) {
         for (int i = 0; i < TimeNow*2; i++) {
@@ -84,8 +84,6 @@ void Generate()
                     ThisThread::sleep_for(219ms);
             }
             aout.write_u16(sample);
-            ADCdata[t] = ain;
-            t++;
             ThisThread::sleep_for(1ms);
         }    
    }
@@ -120,7 +118,6 @@ void ISR3()//select
     t5.start(callback(&queue5, &EventQueue::dispatch_forever));
     queue5.call(Sampling);
     ThisThread::sleep_for(100ms);
-    
 }
 int main()
 {
@@ -134,6 +131,4 @@ int main()
     button1.rise(queue1.event(ISR1));
     button2.rise(queue2.event(ISR2));
     button3.rise(queue3.event(ISR3));
-    
-   
 }
