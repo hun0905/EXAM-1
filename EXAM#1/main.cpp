@@ -46,6 +46,45 @@ void Display(int &i)
         uLCD.printf("%s","1"); 
 
 }
+void Generate()
+{
+    int tmp;
+    uint16_t sample = 0;
+    int count = 0;
+    Display(j);
+    while (1) {
+        if(j!= tmp)
+            Display(j);
+        tmp = j;
+        for (int i = 0; i < TimeNow*2; i++) {
+            if(i < TimeNow)   
+                sample = (uint16_t)(offset*i/RiseTime);
+            else if(i > TimeNow )
+                sample = (uint16_t)(offset*(2*TimeNow-i)/FallTime);
+            else if(i == TimeNow){
+                if(j == 3)
+                    ThisThread::sleep_for(79ms);
+                else if(j == 2)
+                    ThisThread::sleep_for(159ms);
+                else if(j == 1)
+                    ThisThread::sleep_for(199ms);
+                else
+                    ThisThread::sleep_for(219ms);
+            }
+            aout.write_u16(sample);
+            ADCdata[count] = ain;
+            //count++;
+            /*if(count >= 5000){
+                for(int i = 0 ; i < 1000 ; i++)
+                {
+                    std::cout<<ADCdata[i]<<"\r\n";
+                }
+                count = 0;
+            }*/
+            ThisThread::sleep_for(1ms);
+        }    
+   }
+}
 void ISR1() //up
 {
     j = (j == 3)?3:j+1;
@@ -71,13 +110,15 @@ void ISR3()//select
     TimeNow = Time[j];
     RiseTime = TimeNow;
     FallTime = TimeNow;
+    Generate();
     ThisThread::sleep_for(1000ms);
+    
 }
 int main()
 {
-    int tmp;
+    /*int tmp;
     uint16_t sample = 0;
-    int count = 0;
+    int count = 0;*/
     Display(j);
     t1.start(callback(&queue1, &EventQueue::dispatch_forever));
     t2.start(callback(&queue2, &EventQueue::dispatch_forever));
@@ -85,27 +126,30 @@ int main()
     button1.rise(queue1.event(ISR1));
     button2.rise(queue2.event(ISR2));
     button3.rise(queue3.event(ISR3));
-    while (1) {
+    /*while (1) {
         if(j!= tmp)
             Display(j);
         tmp = j;
         for (int i = 0; i < TimeNow*2; i++) {
             if(i < TimeNow)   
                 sample = (uint16_t)(offset*i/RiseTime);
-            else
+            else if(i > TimeNow )
                 sample = (uint16_t)(offset*(2*TimeNow-i)/FallTime);
+            else if(i == TimeNow){
+                if(j == 3)
+                    ThisThread::sleep_for(79ms);
+                else if(j == 2)
+                    ThisThread::sleep_for(159ms);
+                else if(j == 1)
+                    ThisThread::sleep_for(199ms);
+                else
+                    ThisThread::sleep_for(219ms);
+            }
             aout.write_u16(sample);
             ADCdata[count] = ain;
-            //count++;
-            /*if(count >= 5000){
-                for(int i = 0 ; i < 1000 ; i++)
-                {
-                    std::cout<<ADCdata[i]<<"\r\n";
-                }
-                count = 0;
-            }*/
+            
             ThisThread::sleep_for(1ms);
         }    
-   }
+   }*/
    
 }
