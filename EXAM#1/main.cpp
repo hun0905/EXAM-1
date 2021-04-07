@@ -48,20 +48,19 @@ void Display(int &i)
 void ISR1() //up
 {
     j = (j == 3)?3:j+1;
-    //Display(j);
-    
+    Display(j);
     ThisThread::sleep_for(1000ms);
 }
 void ISR2()
 {
     j = (j == 0)?0:j-1;
-    //Display(j);
+    Display(j);
     ThisThread::sleep_for(1000ms);
 }
 void ISR3()//select
 {
-    j = 2;
-    //Display(j);
+    //j = 2;
+    Display(j);
     ThisThread::sleep_for(1000ms);
 }
 int main()
@@ -73,8 +72,8 @@ int main()
     t1.start(callback(&queue1, &EventQueue::dispatch_forever));
     t2.start(callback(&queue2, &EventQueue::dispatch_forever));
     t3.start(callback(&queue3, &EventQueue::dispatch_forever));
-    button1.rise(queue1.event(b1));
-    button2.rise(queue2.event(b2));
-    button3.rise(queue3.event(b3));
+    button1.rise(queue1.event(ISR1));
+    button2.rise(queue2.event(ISR2));
+    button3.rise(queue3.event(ISR3));
    
 }
