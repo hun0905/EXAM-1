@@ -4,7 +4,7 @@
 using namespace std::chrono;
 const double pi = 3.141592653589793238462;
 const double amplitude = 0.5f;
-const double offset = 65535 / 2;
+const double offset = 65535 ;
 
 // The sinewave is created on this pin
 // Adjust analog output pin name to your board spec.
@@ -22,13 +22,13 @@ EventQueue queue3(32 * EVENTS_EVENT_SIZE);
 
 Thread t1,t2,t3;
 
-int j = 0;
+int j = 3;
 float ADCdata[5000];
 int count;
-int Time[3] = {20,50,100};//cycle time
+int Time[4] = {10,20,40,80};//cycle time
 int TimeNow = Time[j];//cycle time now
-int RiseTime = TimeNow*3/5;
-int FallTime = TimeNow*2/5;
+int RiseTime = TimeNow;
+int FallTime = TimeNow;
 
 void Display(int &i)
 {
@@ -44,17 +44,23 @@ void Display(int &i)
         uLCD.printf("%s","1/2");
     else
         uLCD.printf("%s","1"); 
-        
+
 }
 void ISR1() //up
 {
     j = (j == 3)?3:j+1;
+    TimeNow = Time[j];
+    RiseTime = TimeNow;
+    FallTime = TimeNow;
     Display(j);
     ThisThread::sleep_for(1000ms);
 }
 void ISR2()
 {
     j = (j == 0)?0:j-1;
+    TimeNow = Time[j];
+    RiseTime = TimeNow;
+    FallTime = TimeNow;
     Display(j);
     ThisThread::sleep_for(1000ms);
 }
@@ -62,6 +68,9 @@ void ISR3()//select
 {
     //j = 2;
     Display(j);
+    TimeNow = Time[j];
+    RiseTime = TimeNow;
+    FallTime = TimeNow;
     ThisThread::sleep_for(1000ms);
 }
 int main()
@@ -76,5 +85,27 @@ int main()
     button1.rise(queue1.event(ISR1));
     button2.rise(queue2.event(ISR2));
     button3.rise(queue3.event(ISR3));
+    while (1) {
+        if(j!= tmp)
+            Display(j);
+        tmp = j;
+        for (int i = 0; i < TimeNow*2; i++) {
+            if(i < TimeNow)   
+                sample = (uint16_t)(offset*i/RiseTime);
+            else
+                sample = (uint16_t)(offset*(2*TimeNow-i)/FallTime);
+            aout.write_u16(sample);
+            ADCdata[count] = ain;
+            //count++;
+            /*if(count >= 5000){
+                for(int i = 0 ; i < 1000 ; i++)
+                {
+                    std::cout<<ADCdata[i]<<"\r\n";
+                }
+                count = 0;
+            }*/
+            ThisThread::sleep_for(1ms);
+        }    
+   }
    
 }
