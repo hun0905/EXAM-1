@@ -43,7 +43,8 @@ void Display(int &i)
     else if(i ==2)
         uLCD.printf("%s","1/2");
     else
-        uLCD.printf("%s","1");
+        uLCD.printf("%s","1"); 
+        
 }
 void ISR1() //up
 {
